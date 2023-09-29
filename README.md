@@ -9,11 +9,6 @@ Many Deep Learning (DL)-based approaches have gained prominence in anomaly detec
 The typical workflow of DLAD approaches consists of four phases: 1) log parsing, 2) log grouping, 3) log embedding, and 4) model training and prediction.
 <p align="center"><img src="docs/images/framework.png" width="502"><br>The Common Workflow of DLAD Approaches</p>
 
-## Demo
-In this work, we investigate the influence of eleven sampling methods on the performance of three DLAD approaches, namely [CNN](https://ieeexplore.ieee.org/document/8511880), [LogRobust](https://dl.acm.org/doi/10.1145/3338906.3338931) and [NeuralLog](https://www.computer.org/csdl/proceedings-article/ase/2021/033700a492/1AjSXBpYSuk).
-```shell
-```
-
 ## Data 
 The datasets used for training and evaluation are from three publicly available datasets: BGL, Thunderbird and Spirit. The raw logs can be downloaded at https://www.usenix.org/cfdr-data.
 
@@ -23,6 +18,54 @@ For a detailed description of the datasets, please refer to the [DSN'07 paper](h
 Here are the initial and final proportions of sequence anomalies before and after employing resampling techniques.
 <p align="center"><img src="docs/images/sampled_data.png" width="502"><br>Statistics after over-/under-/hybrid sampling the original data</p>
 
+
+
+## Demo
+In this work, we investigate the influence of eleven sampling methods on the performance of three DLAD approaches, namely [CNN](https://ieeexplore.ieee.org/document/8511880), [LogRobust](https://dl.acm.org/doi/10.1145/3338906.3338931) and [NeuralLog](https://www.computer.org/csdl/proceedings-article/ase/2021/033700a492/1AjSXBpYSuk).
+
+### Data Preparation
+1. Download three datasets and put them under the folder ./dataset.
+2. Name the datasets according to their names (i.e. bgl, Spirit and Thunderbird).
+3. Parse the raw logs via [Drain](https://ieeexplore.ieee.org/document/8029742) parser with default parameters before running CNN and LogRobust.
+```shell
+$ cd LogADEmpirical/preprocess
+$ python parser.py
+```
+4. Download the pretrained word vector from [fastText](https://fasttext.cc/docs/en/english-vectors.html). Put the downloaded file under ./dataset and name it as 'nlp-word.vec'.
+5. Compute and store the word embeddings for each dataset.
+```shell
+$ cd LogADEmpirical
+$ python get_embedding.py
+```
+ 
+
+### Demo
+Example of running CNN on BGL with fixed window size of 20 and SMOTE as the sampling method:
+```shell
+$ cd LogADEmpirical
+$ python --folder=bgl/ --semantics  --log_file=BGL.log --dataset_name=bgl --model_name=cnn --window_type=sliding --sample=sliding_window --is_logkey --train_size=0.8 --train_ratio=1 --valid_ratio=0.1 --test_ratio=1 --sampling_method=SMOTE  --sampling_ratio=0.25 --max_epoch=20 --n_warm_up_epoch=0 --n_epochs_stop=10 --batch_size=64 --num_candidates=150 --history_size=10 --lr=0.001 --accumulation_step=5 --session_level=entry --window_size=20 --step_size=20 --output_dir=results/ --is_process
+```
+
+Example of running LogRobust on BGL with fixed window size of 20 and SMOTE as the sampling method:
+```shell
+$ cd LogADEmpirical
+$ python --folder=bgl/ --semantics  --log_file=BGL.log --dataset_name=bgl --model_name=logrobust --window_type=sliding --sample=sliding_window --is_logkey --train_size=0.8 --train_ratio=1 --valid_ratio=0.1 --test_ratio=1 --sampling_method=SMOTE  --sampling_ratio=0.25 --max_epoch=20 --n_warm_up_epoch=0 --n_epochs_stop=10 --batch_size=64 --num_candidates=150 --history_size=10 --lr=0.001 --accumulation_step=5 --session_level=entry --window_size=20 --step_size=20 --output_dir=results/ --is_process
+```
+
+Example of running NeuralLog on BGL with fixed window size of 20 and SMOTE as the sampling method:
+```shell
+$ cd NeuralLog/demo
+$ python NeuralLog.py --max_epoch=20 --batch_size=64 --window_size=20 --step_size=20 --sampling_method=SMOTE  --sampling_ratio=0.25 --model_file=bgl_transformer.hdf5
+```
+
+For more explanation of parameters:
+```shell script
+python main_run.py --help
+```
+Or
+```shell script
+python NeuralLog.py --help
+```
 
 ## Results
 Here are the evaluation results under different data resampling techniques (i.e., NoSampling (NS), SMOTE (SMO), ADASYN (ADA), NearMiss (NM), InstanceHardnessThreshold (IHT), SMOTEENN (SE), SMOTETomek (ST), RandomOverSampling in the feature space (ROS<sub>F</sub>), RandomUnderSampling in the feature space (RUS<sub>F</sub>), RandomOverSampling applied to raw data (ROS<sub>R</sub>), and RandomUnderSampling applied to raw data (RUS<sub>R</sub>)). <br>
