@@ -222,10 +222,10 @@ class Trainer():
             raise NotImplementedError
 
         train_dataset = log_dataset(logs=train_logs, window_size=self.history_size,
-                                    labels=train_labels, class_num= len(vocab))
+                                    labels=train_labels)
 
         valid_dataset = log_dataset(logs=val_logs, window_size=self.history_size,
-                                    labels=val_labels, class_num= len(vocab))
+                                    labels=val_labels)
 
         del train_logs
         del val_logs
@@ -266,6 +266,7 @@ class Trainer():
                 lstm_model = robustlog
 
             model_init = lstm_model(input_size=self.input_size,
+                                    window_size = self.history_size,
                                     hidden_size=self.hidden_size,
                                     num_layers=self.num_layers,
                                     vocab_size=len(vocab),

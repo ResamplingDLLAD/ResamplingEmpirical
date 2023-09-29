@@ -8,7 +8,7 @@ from torch.utils.data import Dataset, Sampler
 
 
 class log_dataset(Dataset):
-    def __init__(self, logs, labels, window_size, class_num):
+    def __init__(self, logs, labels, window_size):
         # self.logs = []
         # for i in range(len(labels)):
         #     features = [torch.tensor(logs[i][0][0], dtype=torch.long)]
@@ -22,15 +22,12 @@ class log_dataset(Dataset):
 
         self.logs = []
         for i in range(len(labels)):
-            start_index = window_size+class_num
+            log_re = np.reshape(logs[i][1:-1], (window_size, 300))
+            features = [torch.tensor([], dtype=torch.long), torch.tensor([logs[i][0]], dtype=torch.long)]
             feature_list = []
-            if start_index != len(logs[i])-1: # Semantic representation is not considered
-                log_re = np.reshape(logs[i][start_index:-1], (window_size, 300))
-                for j in range(0, len(log_re)):
-                    feature_list.append(log_re[j])
-            features = [torch.tensor([logs[i][:window_size]], dtype=torch.long),
-                        torch.tensor([logs[i][window_size:start_index]], dtype=torch.long),
-                        torch.tensor(feature_list, dtype=torch.float)]
+            for j in range(0, len(log_re)):
+                feature_list.append(log_re[j])
+            features.append(torch.tensor(feature_list, dtype=torch.float))
             self.logs.append({
                 "features": features,
                 "idx": int(logs[i][-1])
