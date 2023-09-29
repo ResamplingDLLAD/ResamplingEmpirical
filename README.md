@@ -103,5 +103,5 @@ These tables use color-coding to emphasize the cases that resampling methods imp
 resampling techniques</p>
 <p align="center"><img src="docs/images/LogRobust.png" width="502"><br>The Recall, Precision, Specificity, F1-score, MCC values of LogRobust when employing various data
 resampling techniques</p>
-<p align="center"><img src="docs/images/LogRobust.png" width="502"><br>The Recall, Precision, Specificity, F1-score, MCC values of NeuralLog when employing various data
+<p align="center"><img src="docs/images/NeuralLog.png" width="502"><br>The Recall, Precision, Specificity, F1-score, MCC values of NeuralLog when employing various data
 resampling techniques</p>
