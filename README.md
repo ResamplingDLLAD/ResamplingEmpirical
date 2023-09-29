@@ -1,9 +1,36 @@
 # ResamplingEmpirical
 
-Repository for the paper: Examining the Influence of Data Resampling Techniques on Deep Learning-Based Anomaly Detection: Insights and Recommendations.
+Repository for the paper: On the Influence of Data Resampling for Deep Learning-Based Anomaly Detection: Insights and Recommendations.
 
 **Abstract**: 
-Many Deep Learning (DL)-based approaches have gained prominence in anomaly detection (AD). However, a practical challenge still exists: The prevalent issue of class imbalance in commonly used public data. This imbalance manifests as a substantial disparity in the number of abnormal log sequences compared to normal ones, like anomalies typically account for less than 1% of Thunderbird dataset. Prior research has indicated that state-of-the-art (SOTA) DLAD approaches may exhibit unsatisfactory performance, particularly when confronted with datasets with severe class imbalances. To address this challenge, mitigating class imbalance through data resampling is effective and has been demonstrated in various Software Engineering (SE) tasks. In this comprehensive study, we delve deeply into the impact of diverse data resampling techniques on DLAD approaches from two distinct aspects. First, we assess the performance of DLAD approaches and evaluate the effectiveness of data resampling techniques on those approaches when utilizing predefined desired ratios of normal to abnormal data. Second, we explore the implications of varying desired ratios within different resampling categories, accompanied by practical recommendations. Our findings indicate that, on the whole, oversampling techniques outperform undersampling and hybrid sampling techniques, and simple random sampling directly applied to raw data exhibits superior performance compared to other techniques conducted in the feature space. Interestingly, undersampling methods do not effectively alleviate the data imbalance issue. To maximize the effectiveness of resampling for DLAD approaches, we recommend adopting an oversampling method with a lower desired ratio, thereby narrowing the gap between the counts of normal and abnormal data instances by creating more minority data. For undersampling methods, we recommend employing a larger desired ratio, that is, mitigating the disparity between the quantities of the two classes while reducing information loss. Overall, our study offers valuable insights into the intricate relationship between data resampling techniques and DLAD.
+Numerous Deep Learning (DL)-based approaches have garnered considerable attention in the field of software
+anomaly detection (AD). However, a practical challenge persists: The prevalent issue of class imbalance in the
+public data commonly used to train the DL models. This imbalance is characterized by a substantial disparity
+in the number of abnormal log sequences compared to normal ones, for example, anomalies represent less
+than 1% of one of the most popular datasets, namely the Thunderbird dataset.
+
+Previous research has indicated that existing DLAD approaches may exhibit unsatisfactory performance,
+particularly when confronted with datasets featuring severe class imbalances. Mitigating class imbalance
+through data resampling has proven effective for other software engineering tasks, however it has been
+unexplored for AD thus far.
+
+This study aims to fill this gap by providing an in-depth analysis of the impact of diverse data resampling
+techniques on existing DLAD approaches from two distinct perspectives. Firstly, we assess the performance of
+these DLAD approaches and evaluate the effectiveness of data resampling techniques when utilizing predefined
+desired ratios of normal to abnormal data. Secondly, we explore the implications of varying desired ratios
+within different resampling techniques, accompanied by practical recommendations.
+Our findings indicate that, overall, oversampling techniques outperform undersampling and hybrid sampling
+techniques. Specifically, simple random sampling directly applied to raw data exhibits superior performance
+compared to other techniques conducted in the feature space. Interestingly, undersampling techniques do not
+effectively alleviate the issue of data imbalance. To maximize the effectiveness of resampling for existing DLAD
+approaches, we recommend adopting an oversampling method with a lower desired ratio. This approach
+narrows the gap between the counts of normal and abnormal data by creating more minority data. For
+undersampling methods, we recommend employing a larger desired ratio to mitigate the disparity between
+the quantities of the two classes while minimizing information loss.
+
+In conclusion, our study provides valuable insights into the intricate relationship between data resampling
+techniques and DLAD. By addressing the challenge of class imbalance, researchers and practitioners can
+enhance the performance of DLAD approaches in anomaly detection tasks.
 
 ## Framwork of DLAD Models
 The typical workflow of DLAD approaches consists of four phases: 1) log parsing, 2) log grouping, 3) log embedding, and 4) model training and prediction.
@@ -26,32 +53,34 @@ In this work, we investigate the influence of eleven sampling methods on the per
 ### Data Preparation
 1. Download three datasets and put them under the folder ./dataset.
 2. Name the datasets according to their names (i.e. bgl, Spirit and Thunderbird).
-3. Parse the raw logs via [Drain](https://ieeexplore.ieee.org/document/8029742) parser with default parameters before running CNN and LogRobust.
+3. Parse the raw logs via [Drain](https://ieeexplore.ieee.org/document/8029742) parser with default parameters setting before running CNN and LogRobust.
 ```shell
 $ cd LogADEmpirical/preprocess
 $ python parser.py
 ```
 4. Download the pretrained word vector from [fastText](https://fasttext.cc/docs/en/english-vectors.html). Put the downloaded file under ./dataset and name it as 'nlp-word.vec'.
-5. Compute and store the word embeddings for each dataset.
+5. Compute and store the word embeddings for each dataset. Please change the parameter setting accordingly.
 ```shell
 $ cd LogADEmpirical
 $ python get_embedding.py
 ```
  
 
-### Demo
+### CNN
 Example of running CNN on BGL with fixed window size of 20 and SMOTE as the sampling method:
 ```shell
 $ cd LogADEmpirical
 $ python --folder=bgl/ --semantics  --log_file=BGL.log --dataset_name=bgl --model_name=cnn --window_type=sliding --sample=sliding_window --is_logkey --train_size=0.8 --train_ratio=1 --valid_ratio=0.1 --test_ratio=1 --sampling_method=SMOTE  --sampling_ratio=0.25 --max_epoch=20 --n_warm_up_epoch=0 --n_epochs_stop=10 --batch_size=64 --num_candidates=150 --history_size=10 --lr=0.001 --accumulation_step=5 --session_level=entry --window_size=20 --step_size=20 --output_dir=results/ --is_process
 ```
 
+### LogRobust
 Example of running LogRobust on BGL with fixed window size of 20 and SMOTE as the sampling method:
 ```shell
 $ cd LogADEmpirical
 $ python --folder=bgl/ --semantics  --log_file=BGL.log --dataset_name=bgl --model_name=logrobust --window_type=sliding --sample=sliding_window --is_logkey --train_size=0.8 --train_ratio=1 --valid_ratio=0.1 --test_ratio=1 --sampling_method=SMOTE  --sampling_ratio=0.25 --max_epoch=20 --n_warm_up_epoch=0 --n_epochs_stop=10 --batch_size=64 --num_candidates=150 --history_size=10 --lr=0.001 --accumulation_step=5 --session_level=entry --window_size=20 --step_size=20 --output_dir=results/ --is_process
 ```
 
+### NeuralLog
 Example of running NeuralLog on BGL with fixed window size of 20 and SMOTE as the sampling method:
 ```shell
 $ cd NeuralLog/demo
