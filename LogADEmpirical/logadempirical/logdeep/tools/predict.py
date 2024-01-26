@@ -14,6 +14,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from sklearn.metrics import auc
+from sklearn import metrics
 
 from logadempirical.logdeep.dataset.log import log_dataset
 from logadempirical.logdeep.dataset.sample import sliding_window
@@ -363,6 +364,8 @@ class Predicter():
         test_normal_loader, test_abnormal_loader = generate(self.output_dir, 'test.pkl',
                                                             is_neural=self.embeddings == 'neural')
         start_time = time.time()
+
+        # test normal item
         data = [(k, v, list(k)) for k, v in test_normal_loader.items()]
         logs, labels = sliding_window(data, vocab, window_size=self.history_size, is_train=False,
                                       data_dir=self.data_dir, semantics=self.semantics, is_predict_logkey=False,
@@ -371,6 +374,8 @@ class Predicter():
         data_loader = DataLoader(dataset, batch_size=4096, shuffle=False, pin_memory=True)
 
         normal_results = [0] * len(data)
+        y = [0] * len(data)
+        normal_scores = [[]] * len(data)
         for _, (log, label) in enumerate(tqdm(data_loader)):
             seq_idx = log['idx'].tolist()
             features = [x.to(self.device) for x in log['features']]
@@ -381,6 +386,7 @@ class Predicter():
             pred = pred.cpu().numpy().tolist()
             for i in range(len(pred)):
                 normal_results[seq_idx[i]] = max(normal_results[seq_idx[i]], int(pred[i]))
+                normal_scores[seq_idx[i]].append(output[i][1].detach().numpy())
 
         total_normal, FP = 0, 0
         for i in range(len(normal_results)):
@@ -388,6 +394,7 @@ class Predicter():
                 FP += data[i][1]
             total_normal += data[i][1]
 
+        # test abnormal item
         data = [(k, v, list(k)) for k, v in test_abnormal_loader.items()]
         logs, labels = sliding_window(data, vocab, window_size=self.history_size, is_train=False,
                                       data_dir=self.data_dir, semantics=self.semantics, is_predict_logkey=False,
@@ -395,9 +402,10 @@ class Predicter():
         dataset = log_dataset(logs=logs, labels=labels, window_size=self.history_size)
         data_loader = DataLoader(dataset, batch_size=4096, shuffle=False, pin_memory=True)
         abnormal_results = [[]] * len(data)
+        y += [1] * len(data)
+        abnormal_scores = [[]] * len(data)
         for _, (log, label) in enumerate(tqdm(data_loader)):
             seq_idx = log['idx'].tolist()
-            # print(seq_idx)
             features = [x.to(self.device) for x in log['features']]
             output, _ = model(features, self.device)
             output = output.softmax(dim=1)
@@ -406,14 +414,31 @@ class Predicter():
             pred = pred.cpu().numpy().tolist()
             for i in range(len(pred)):
                 abnormal_results[seq_idx[i]] = abnormal_results[seq_idx[i]] + [int(pred[i])]
+                abnormal_scores[seq_idx[i]].append(output[i][1].detach().numpy())
+
         lead_time = []
         total_abnormal, TP = 0, 0
         for i in range(len(abnormal_results)):
-            # print(len(abnormal_results[i]))
             if max(abnormal_results[i]) == 1:
                 TP += data[i][1]
                 lead_time.append(abnormal_results[i].index(1) + self.history_size + 1)
             total_abnormal += data[i][1]
+
+        final_scores = abnormal_scores + normal_scores
+        probs = []
+        for score_list in final_scores:
+            anomaly_score = []
+            for score in score_list:
+                if score > 0.5:
+                    anomaly_score.append(score)
+            if len(anomaly_score) > 0:
+                probs.append(sum(anomaly_score) / len(anomaly_score))
+            else:
+                probs.append(sum(score_list) / len(score_list))
+
+        FPR, TPR, thresholds = metrics.roc_curve(y, probs)
+        AUC = auc(FPR, TPR)
+        print("AUC: ", AUC)
 
         TN = total_normal - FP
         FN = total_abnormal - TP
@@ -586,7 +611,3 @@ class Predicter():
         #
         #     elapsed_time = time.time() - start_time
         #     print('elapsed_time: {}'.format(elapsed_time))
-
-
-if __name__ == "__main__":
-    test_normal, test_abnormal = generate('../../../results/bgl/sessions-0.25-SMOTE/', 'test.pkl', is_neural=False)

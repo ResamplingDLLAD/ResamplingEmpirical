@@ -18,3 +18,7 @@ def run_logrobust(options):
 
     Trainer(options).start_train()
     Predicter(options).predict_supervised2()
+
+
+def test_logrobust(options):
+    Predicter(options).predict_supervised2()

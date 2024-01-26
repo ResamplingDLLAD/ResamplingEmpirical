@@ -4,8 +4,8 @@ import os
 from logadempirical.logdeep.tools.utils import seed_everything, save_parameters
 from logadempirical.deeplog import run_deeplog
 from logadempirical.loganomaly import run_loganomaly
-from logadempirical.logrobust import run_logrobust
-from logadempirical.cnn import run_cnn
+from logadempirical.logrobust import run_logrobust, test_logrobust
+from logadempirical.cnn import run_cnn, test_cnn
 from logadempirical.bert import run_logbert
 from logadempirical.plelog import run_plelog
 from logadempirical.neurallog import run_neuralog
@@ -50,6 +50,7 @@ def arg_parser():
     parser.add_argument("--tau", default=0.5, type=float,
                         help="the percentage of tokens matched to merge a log message")
 
+    parser.add_argument("--mode",default='train', type=str, choices=["train", "test"], help="the model stage")
     parser.add_argument("--is_process", action='store_true', help="if split train and test data")
     parser.add_argument("--is_instance", action='store_true', help="if instances of log are available")
     parser.add_argument("--train_file", default="train_fixed100_instances.pkl", help="train instances file name")
@@ -199,25 +200,33 @@ def main():
     print("Save options parameters\n")
     save_parameters(options, options["model_dir"] + "parameters.txt")
 
-    if args.model_name == "logbert":
-        run_logbert(options)
-    elif args.model_name == "deeplog":
-        run_deeplog(options)
-    elif args.model_name == "loganomaly":
-        run_loganomaly(options)
-    elif args.model_name == "logrobust":
-        run_logrobust(options)
-    elif args.model_name == "cnn":
-        run_cnn(options)
-    elif args.model_name == "plelog":
-        run_plelog(options)
-    elif args.model_name == "baseline":
-        pass
-    elif args.model_name == "neurallog":
-        run_neuralog(options)
-    else:
-        raise NotImplementedError(f"Model {args.model_name} is not defined")
-
+    if args.mode == "train":
+        if args.model_name == "logbert":
+            run_logbert(options)
+        elif args.model_name == "deeplog":
+            run_deeplog(options)
+        elif args.model_name == "loganomaly":
+            run_loganomaly(options)
+        elif args.model_name == "logrobust":
+            run_logrobust(options)
+        elif args.model_name == "cnn":
+            run_cnn(options)
+        elif args.model_name == "plelog":
+            run_plelog(options)
+        elif args.model_name == "baseline":
+            pass
+        elif args.model_name == "neurallog":
+            run_neuralog(options)
+        else:
+            raise NotImplementedError(f"Model {args.model_name} is not defined")
+    elif args.mode == "test":
+        if args.model_name == "logrobust":
+            test_logrobust(options)
+        elif args.model_name == "cnn":
+            test_cnn(options)
+        else:
+            raise NotImplementedError(f"Model {args.model_name} is not defined for testing case")
 
 if __name__ == "__main__":
     main()
+

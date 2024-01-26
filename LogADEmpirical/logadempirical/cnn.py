@@ -20,3 +20,6 @@ def run_cnn(options):
 
     Trainer(options).start_train()
     Predicter(options).predict_supervised2()
+
+def test_cnn(options):
+    Predicter(options).predict_supervised2()
