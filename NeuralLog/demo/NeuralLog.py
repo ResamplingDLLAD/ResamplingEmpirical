@@ -8,12 +8,14 @@ from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
 from tensorflow.keras.losses import SparseCategoricalCrossentropy
 from official.nlp import optimization
 from sklearn.utils import shuffle
+from sklearn.metrics import matthews_corrcoef
 sys.path.append("../")
 from neurallog.models import NeuralLog
 from neurallog import data_loader
 from neurallog.utils import classification_report
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, auc
 import matplotlib.pyplot as plt
+from sklearn import metrics
 from argparse import ArgumentParser
 
 embed_dim = 256  # Embedding size for each token
@@ -124,6 +126,7 @@ def test_model(model, x, y, batch_size):
     test_loader = BatchGenerator(x, y, batch_size)
     prediction = model.predict_generator(test_loader, steps=(len(x) // batch_size), workers=16, max_queue_size=32,
                                          verbose=1)
+    probs = prediction[:, 1]
     prediction = np.argmax(prediction, axis=1)
     y = y[:len(prediction)]
     report = classification_report(np.array(y), prediction)
@@ -134,7 +137,7 @@ def test_model(model, x, y, batch_size):
     ax.matshow(conf_matrix, cmap=plt.cm.Blues, alpha=0.3)
     for i in range(conf_matrix.shape[0]):
         for j in range(conf_matrix.shape[1]):
-            ax.text(x=j, y=i,s=conf_matrix[i, j], va='center', ha='center', size='xx-large')
+            ax.text(x=j, y=i, s=conf_matrix[i, j], va='center', ha='center', size='xx-large')
     
     plt.xlabel('Predictions', fontsize=18)
     plt.ylabel('Actual', fontsize=18)
@@ -147,11 +150,24 @@ def test_model(model, x, y, batch_size):
     print("False Positive (FP): ", fp)
     print("False Negative (FN): ", fn)
 
+    recall = tp/(tp+fn)
+    precision = tp/(tp+fp)
+    spec = tn/(fp+tn)
+    f1 = 2*recall*precision/(recall+precision)
+    mcc = matthews_corrcoef(y, prediction.tolist())
+    print('Precision: {:.3f}%, Recall: {:.3f}%, F1-measure: {:.3f}%, Specificity: {:.3f}'.format(precision, recall, f1, spec))
+
+    FPR, TPR, thresholds = metrics.roc_curve(np.array(y), probs, pos_label=1)
+    AUC = auc(FPR, TPR)
+
+    print('AUC: {}'.format(AUC))
+    print('MCC:{}'.format(mcc))
+
 def arg_parser():
     parser = ArgumentParser()
     parser.add_argument("--log_file", default="../../dataset/bgl/BGL.log", help="path to raw logs")
     parser.add_argument('--window_size', default=20, type=int, help='number of logs in a sequence')
-    parser.add_argument('--step_size', default=20, type=float, help='number of logs passed between the start '
+    parser.add_argument('--step_size', default=20, type=int, help='number of logs passed between the start '
                                                                    'indexes of two sequences')
     parser.add_argument('--sampling_method', default='SMOTE', type=str, help='selected sampling method')
     parser.add_argument("--sampling_ratio", default=0.25, type=float)

@@ -1,5 +1,8 @@
 import os
+import re
+from collections import Counter
 
+import numpy as np
 from logadempirical.PLELog.data.DataLoader import *
 
 
@@ -186,6 +189,8 @@ def nlp_emb_mergeTemplateEmbeddings_BGL(dir, templates, dataset, logger):
         vec_file = 'templates_Spirit'
     elif dataset == "hdfs":
         vec_file = "templates_HDFS"
+    elif dataset == "huawei":
+        vec_file = "templates_Huawei"
     else:
         logger.info("Unknown dataset")
         exit(-2)

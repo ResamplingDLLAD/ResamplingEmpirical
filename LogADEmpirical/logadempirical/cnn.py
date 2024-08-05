@@ -14,8 +14,8 @@ def run_cnn(options):
             data = pickle.load(f)
         logs = [x['EventId'] for x in data]
         vocab = Vocab(logs, os.path.join(options['data_dir'], options["embeddings"]), "cnn")
-        print("vocab size", len(vocab))
-        print("save vocab in", options["vocab_path"])
+        print("Vocab size", len(vocab))
+        print("Save vocab in", options["vocab_path"])
         vocab.save_vocab(options["vocab_path"])
 
     Trainer(options).start_train()

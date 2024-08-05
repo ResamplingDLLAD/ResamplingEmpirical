@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import math
 import time
 import pickle
 import scipy.stats as stats
@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from sklearn.metrics import auc
 from sklearn import metrics
-
+from sklearn.metrics import matthews_corrcoef
 from logadempirical.logdeep.dataset.log import log_dataset
 from logadempirical.logdeep.dataset.sample import sliding_window
 from logadempirical.logdeep.models.lstm import deeplog, loganomaly, robustlog
@@ -343,23 +343,23 @@ class Predicter():
         with open(self.vocab_path, 'rb') as f:
             vocab = pickle.load(f)
 
-        if self.model_name == "cnn":
-            model = TextCNN(self.dim_model, self.seq_len, 128).to(self.device)
-        elif self.model_name == "neurallog":
-            model = NeuralLog(num_encoder_layers=1, num_heads=12, dim_model=768, dim_feedforward=2048,
-                              droput=0.2).to(self.device)
-        else:
-            lstm_model = robustlog
-            model_init = lstm_model(input_size=self.input_size,
-                                    window_size=self.history_size,
-                                    hidden_size=self.hidden_size,
-                                    num_layers=self.num_layers,
-                                    vocab_size=len(vocab),
-                                    embedding_dim=self.embedding_dim)
-            model = model_init.to(self.device)
-        model.load_state_dict(torch.load(self.model_path)['state_dict'])
-        model.eval()
-        print('model_path: {}'.format(self.model_path))
+        # if self.model_name == "cnn":
+        #     model = TextCNN(self.dim_model, self.seq_len, 128).to(self.device)
+        # elif self.model_name == "neurallog":
+        #     model = NeuralLog(num_encoder_layers=1, num_heads=12, dim_model=768, dim_feedforward=2048,
+        #                       droput=0.2).to(self.device)
+        # else:
+        #     lstm_model = robustlog
+        #     model_init = lstm_model(input_size=self.input_size,
+        #                             window_size=self.history_size,
+        #                             hidden_size=self.hidden_size,
+        #                             num_layers=self.num_layers,
+        #                             vocab_size=len(vocab),
+        #                             embedding_dim=self.embedding_dim)
+        #     model = model_init.to(self.device)
+        # model.load_state_dict(torch.load(self.model_path)['state_dict'])
+        # model.eval()
+        # print('model_path: {}'.format(self.model_path))
 
         test_normal_loader, test_abnormal_loader = generate(self.output_dir, 'test.pkl',
                                                             is_neural=self.embeddings == 'neural')
@@ -386,7 +386,7 @@ class Predicter():
             pred = pred.cpu().numpy().tolist()
             for i in range(len(pred)):
                 normal_results[seq_idx[i]] = max(normal_results[seq_idx[i]], int(pred[i]))
-                normal_scores[seq_idx[i]].append(output[i][1].detach().numpy())
+                normal_scores[seq_idx[i]] = normal_scores[seq_idx[i]] + [output[i][1].detach().numpy()]
 
         total_normal, FP = 0, 0
         for i in range(len(normal_results)):
@@ -414,17 +414,17 @@ class Predicter():
             pred = pred.cpu().numpy().tolist()
             for i in range(len(pred)):
                 abnormal_results[seq_idx[i]] = abnormal_results[seq_idx[i]] + [int(pred[i])]
-                abnormal_scores[seq_idx[i]].append(output[i][1].detach().numpy())
-
+                abnormal_scores[seq_idx[i]] = abnormal_scores[seq_idx[i]] + [output[i][1].detach().numpy()]
         lead_time = []
         total_abnormal, TP = 0, 0
         for i in range(len(abnormal_results)):
             if max(abnormal_results[i]) == 1:
                 TP += data[i][1]
                 lead_time.append(abnormal_results[i].index(1) + self.history_size + 1)
+            else: print(i)
             total_abnormal += data[i][1]
 
-        final_scores = abnormal_scores + normal_scores
+        final_scores = normal_scores + abnormal_scores
         probs = []
         for score_list in final_scores:
             anomaly_score = []
@@ -436,13 +436,14 @@ class Predicter():
             else:
                 probs.append(sum(score_list) / len(score_list))
 
-        FPR, TPR, thresholds = metrics.roc_curve(y, probs)
-        AUC = auc(FPR, TPR)
-        print("AUC: ", AUC)
+        fpr, tpr, thresholds = metrics.roc_curve(y, probs, pos_label=1)
+
+        AUC = auc(fpr, tpr)
 
         TN = total_normal - FP
         FN = total_abnormal - TP
 
+        mcc = (TP * TN - FP * FN) / math.sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))
         try:
             P = 100 * TP / (TP + FP)
         except ZeroDivisionError:
@@ -470,7 +471,8 @@ class Predicter():
         # print('Precision: {:.3f}%, Recall: {:.3f}%, F1-measure: {:.3f}%, Specificity: {:.3f}, '
         #       'Lead time: {:.3f}'.format(P, R, F1, SP, sum(lead_time) / len(lead_time)))
         print('Precision: {:.3f}%, Recall: {:.3f}%, F1-measure: {:.3f}%, Specificity: {:.3f}'.format(P, R, F1, SP))
-
+        print('AUC: {}'.format(AUC))
+        print('MCC:{}'.format(mcc))
         elapsed_time = time.time() - start_time
         print('elapsed_time: {}'.format(elapsed_time))
 
@@ -556,6 +558,7 @@ class Predicter():
             FPR = FP / (FP + TN)
             FNR = FN / (TP + FN)
             SP = TN / (TN + FP)
+
             print("Confusion matrix for threshold", threshold)
             print("TP: {}, TN: {}, FP: {}, FN: {}, FNR: {}, FPR: {}".format(TP, TN, FP, FN, FNR, FPR))
             print('Precision: {:.3f}%, Recall: {:.3f}%, F1-measure: {:.3f}%, Specificity: {:.3f}'.format(P, R, F1, SP))

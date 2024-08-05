@@ -98,7 +98,7 @@ class Trainer():
         print("Loading vocab ...")
         with open(self.vocab_path, 'rb') as f:
             vocab = pickle.load(f)
-        print("vocab Size: ", len(vocab))
+        print("Vocab size: ", len(vocab))
 
         if self.sample == 'sliding_window':
             print("Loading train dataset\n")
@@ -119,7 +119,8 @@ class Trainer():
 
             # del data
             # gc.collect()
-
+            print('Start sampling')
+            start_time = time.time()
             per = self.sampling_ratio
             o_ratio = int(train_labels.count(0)) / int(train_labels.count(1))
 
@@ -205,6 +206,10 @@ class Trainer():
                 print("Sampling method: ", self.sampling_method)
                 print("Sampling ratio: ", str(self.sampling_ratio))
 
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            print('End sampling')
+            print(f"Sampling running time: {elapsed_time:.2f} seconds")
             n_val = int(len(train_logs) * self.valid_ratio)
 
             L = random.sample(range(0, len(train_logs)), n_val)
@@ -213,9 +218,9 @@ class Trainer():
                 val_logs.append(train_logs[i])
                 val_labels.append(train_labels[i])
             # val_logs, val_labels = train_logs[-n_val:], train_labels[-n_val:]
-            print("after sampling, the number of training logs: ", len(train_logs))
+            print("After sampling, the number of training logs: ", len(train_logs))
             print(Counter(train_labels))
-            print("the number of val logs: ", len(val_logs))
+            print("The number of val logs: ", len(val_logs))
             print(Counter(val_labels))
 
         else:
@@ -249,7 +254,6 @@ class Trainer():
         self.threshold_rate = self.num_train_log // self.num_valid_log
 
         if self.model_name == "cnn":
-            print(self.dim_model, self.seq_len)
             self.model = TextCNN(self.dim_model, self.seq_len, 128).to(self.device)
         elif self.model_name == "autoencoder":
             self.model = AutoEncoder(self.hidden_size, self.num_layers, embedding_dim=self.embedding_dim).to(

@@ -110,6 +110,7 @@ def sliding_window(data_iter, vocab, window_size, is_train=True, data_dir="datas
 
     result_logs = []
     labels = []
+    # content_list = []
 
     num_sessions = 0
     num_classes = len(vocab)
@@ -118,7 +119,7 @@ def sliding_window(data_iter, vocab, window_size, is_train=True, data_dir="datas
     for idx, (orig_line, lbls, contents) in enumerate(data_iter):
         orig_line = list(orig_line)
         if (num_sessions + 1) % 100 == 0:
-            print("processed %s lines" % (num_sessions + 1), end='\r')
+            print("Processed %s lines" % (num_sessions + 1), end='\r')
         line = [vocab.stoi.get(ln, vocab.find_similar(ln)) for ln in orig_line]
 
         if is_predict_logkey:
@@ -182,6 +183,7 @@ def sliding_window(data_iter, vocab, window_size, is_train=True, data_dir="datas
                     seq_logs = contents[i: i + window_size]
                 else:
                     seq_logs = orig_line[i: i + window_size]
+
                 for event in seq_logs:
                     if event == "padding":
                         semantic_pattern += [-1] * in_size
@@ -203,6 +205,7 @@ def sliding_window(data_iter, vocab, window_size, is_train=True, data_dir="datas
 
             result_logs.append(sequential_pattern)
             labels.append(label)
+            # content_list.append(contents[i: i + window_size])
 
         num_sessions += 1
     # else:
@@ -291,5 +294,5 @@ def sliding_window(data_iter, vocab, window_size, is_train=True, data_dir="datas
         result_logs, labels = down_sample(result_logs, labels, sample_ratio)
     if is_train:
         print('Number of sessions {}'.format(num_sessions))
-        print('Number of seqs {}'.format(len(result_logs)))
+        print('Number of embedding seqs {}'.format(len(result_logs)))
     return result_logs, labels

@@ -26,12 +26,12 @@ def arg_parser():
     parser.add_argument("--model_name", help="which model to train", choices=["logbert", "deeplog", "loganomaly",
                                                                               "logrobust", "baseline", "neurallog",
                                                                               "cnn", "autoencoder", "plelog"])
-    parser.add_argument("--dataset_name", help="which dataset to use", choices=["hdfs", "bgl", "tbird", "hdfs_2k",
+    parser.add_argument("--dataset_name", help="which dataset to use", choices=["hdfs", "bgl", "tbird", "huawei", "hdfs_2k",
                                                                                 "bgl_2k", "tdb", "spirit", "bo",
                                                                                 "bgl2", "hadoop"])
     parser.add_argument("--device", help="hardware device", default="cuda")
     parser.add_argument("--data_dir", default="../dataset/", metavar="DIR", help="data directory")
-    parser.add_argument("--output_dir", default="./experimental_results/RQ1/random/", metavar="DIR",
+    parser.add_argument("--output_dir", default="./results/", metavar="DIR",
                         help="output directory")
     parser.add_argument("--folder", default='bgl', metavar="DIR")
 
@@ -70,10 +70,10 @@ def arg_parser():
     parser.add_argument("--valid_ratio", default=0.1, type=float)
     parser.add_argument("--test_ratio", default=1, type=float)
     parser.add_argument("--sampling_ratio", default=1, type=float)
-    parser.add_argument("--sampling_method", type=str, choices=['N', 'SMOTE', 'ADASYN', 'NearMiss', 'ClusterCentroids',
-                                                                'InstanceHardnessThreshold', 'SMOTEENN', 'SMOTETomek'])
+    parser.add_argument("--sampling_method", type=str, choices=['N','randomO', 'randomU', 'SMOTE', 'ADASYN', 'NearMiss', 'ClusterCentroids', 'RandomOverSampler',
+                                                                'InstanceHardnessThreshold', 'SMOTEENN', 'SMOTETomek','RandomUnderSampler'])
 
-    parser.add_argument("--max_epoch", default=200, type=int, help="epochs")
+    parser.add_argument("--max_epoch", default=20, type=int, help="epochs")
     parser.add_argument("--n_epochs_stop", default=10, type=int,
                         help="training stops after n epochs without improvement")
     parser.add_argument("--n_warm_up_epoch", default=10, type=int, help="save model parameters after n warm-up epoch")
@@ -226,6 +226,7 @@ def main():
             test_cnn(options)
         else:
             raise NotImplementedError(f"Model {args.model_name} is not defined for testing case")
+
 
 if __name__ == "__main__":
     main()

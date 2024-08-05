@@ -140,15 +140,22 @@ def fixed_window(raw_data, para):
     :return: dataframe columns=[eventids, time durations, label]
     """
     log_size = raw_data.shape[0]
-    label_data, time_data = raw_data.iloc[:, 1], raw_data.iloc[:, 0]
-    # print(label_data[:10])
-    logkey_data, deltaT_data, log_template_data = raw_data.iloc[:, 2], raw_data.iloc[:, 3], raw_data.iloc[:, 4]
-    content_data = raw_data.iloc[:, 5]
+    number_of_columns = raw_data.shape[1]
+    if number_of_columns == 6:
+        label_data = raw_data.iloc[:, 1]
+        logkey_data, log_template_data = raw_data.iloc[:, 2], raw_data.iloc[:, 4]
+        content_data = raw_data.iloc[:, 5]
+    else:
+        label_data = raw_data.iloc[:, 0]
+        logkey_data, log_template_data = raw_data.iloc[:, 1], raw_data.iloc[:, 2]
+        content_data = raw_data.iloc[:, 3]
+
     new_data = []
     start_end_index_pair = set()
 
     start_index = 0
     num_session = 0
+    abnormal_num = 0
     print("Log number:", log_size)
     while start_index < log_size:
         end_index = min(start_index + int(para["window_size"]), log_size)
@@ -156,10 +163,12 @@ def fixed_window(raw_data, para):
         start_index = start_index + int(para['step_size'])
         num_session += 1
         if num_session % 1000 == 0:
-            print("process {} time window".format(num_session), end='\r')
+            print("Process {} time window".format(num_session), end='\r')
 
     n_sess = 0
     for (start_index, end_index) in start_end_index_pair:
+        if max(label_data[start_index:end_index].values)>0:
+            abnormal_num += 1
         new_data.append({
             "Label": label_data[start_index:end_index].values,
             "EventId": logkey_data[start_index: end_index].values,
@@ -170,8 +179,9 @@ def fixed_window(raw_data, para):
         n_sess += 1
 
     assert len(start_end_index_pair) == len(new_data)
-    print('there are %d instances (sliding windows) in this dataset' % len(start_end_index_pair))
-    return pd.DataFrame(new_data)
+    print('There are %d instances (sliding windows) in this dataset' % len(start_end_index_pair))
+    print('abnormal_num', abnormal_num)
+    return pd.DataFrame(new_data), start_end_index_pair
 
 
 def _custom_resampler(array_like):
