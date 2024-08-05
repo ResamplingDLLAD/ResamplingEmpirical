@@ -3,34 +3,11 @@
 Repository for the paper: On the Influence of Data Resampling for Deep Learning-Based Anomaly Detection: Insights and Recommendations.
 
 **Abstract**: 
-Numerous Deep Learning (DL)-based approaches have garnered considerable attention in the field of software
-anomaly detection (AD). However, a practical challenge persists: The prevalent issue of class imbalance in the
-public data commonly used to train the DL models. This imbalance is characterized by a substantial disparity
-in the number of abnormal log sequences compared to normal ones, for example, anomalies represent less
-than 1% of one of the most popular datasets, namely the Thunderbird dataset.
+Numerous Deep Learning (DL)-based approaches have garnered considerable attention in the field of software Log Anomaly Detection (LAD). However, a practical challenge persists: The prevalent issue of class imbalance in the public data commonly used to train the DL models. This imbalance is characterized by a substantial disparity in the number of abnormal log sequences compared to normal ones, for example, anomalies represent less than 1% of one of the most popular datasets, namely the Thunderbird dataset.  Previous research has indicated that existing DLLAD approaches may exhibit unsatisfactory performance, particularly when confronted with datasets featuring severe class imbalances. Mitigating class imbalance through data resampling has proven effective for other software engineering tasks, however, it has been unexplored for LAD thus far.
 
-Previous research has indicated that existing DLAD approaches may exhibit unsatisfactory performance,
-particularly when confronted with datasets featuring severe class imbalances. Mitigating class imbalance
-through data resampling has proven effective for other software engineering tasks, however it has been
-unexplored for AD thus far.
+This study aims to fill this gap by providing an in-depth analysis of the impact of diverse data resampling methods on existing DLLAD approaches from two distinct perspectives. Firstly, we assess the performance of these DLLAD approaches across three datasets, and explore the impact of resampling ratios of normal to abnormal data on ten data resampling methods. Secondly, we evaluate the effectiveness of the data resampling methods when utilizing optimal resampling ratios of normal to abnormal data. Our findings indicate that oversampling methods generally outperform undersampling and hybrid sampling methods. Data resampling on raw data yields superior results compared to data resampling in the feature space. In most cases, certain undersampling and hybrid methods (e.g., SMOTEENN and InstanceHardnessThreshold) show limited effectiveness. Additionally, by exploring the resampling ratio of normal to abnormal data, we suggest generating more data for minority classes through oversampling while removing less data from majority classes through undersampling. 
 
-This study aims to fill this gap by providing an in-depth analysis of the impact of diverse data resampling
-techniques on existing DLAD approaches from two distinct perspectives. Firstly, we assess the performance of
-these DLAD approaches and evaluate the effectiveness of data resampling techniques when utilizing predefined
-desired ratios of normal to abnormal data. Secondly, we explore the implications of varying desired ratios
-within different resampling techniques, accompanied by practical recommendations.
-Our findings indicate that, overall, oversampling techniques outperform undersampling and hybrid sampling
-techniques. Specifically, simple random sampling directly applied to raw data exhibits superior performance
-compared to other techniques conducted in the feature space. Interestingly, undersampling techniques do not
-effectively alleviate the issue of data imbalance. To maximize the effectiveness of resampling for existing DLAD
-approaches, we recommend adopting an oversampling method with a lower desired ratio. This approach
-narrows the gap between the counts of normal and abnormal data by creating more minority data. For
-undersampling methods, we recommend employing a larger desired ratio to mitigate the disparity between
-the quantities of the two classes while minimizing information loss.
-
-In conclusion, our study provides valuable insights into the intricate relationship between data resampling
-techniques and DLAD. By addressing the challenge of class imbalance, researchers and practitioners can
-enhance the performance of DLAD approaches in anomaly detection tasks.
+In conclusion, our study provides valuable insights into the intricate relationship between data resampling methods and DLLAD. By addressing the challenge of class imbalance, researchers and practitioners can enhance the model performance in DLLAD.
 
 ## Framwork of DLAD Models
 The typical workflow of DLAD approaches consists of four phases: 1) log parsing, 2) log grouping, 3) log embedding, and 4) model training and prediction.
@@ -99,9 +76,9 @@ python NeuralLog.py --help
 ## Results
 Here are the evaluation results under different data resampling techniques (i.e., NoSampling (NS), SMOTE (SMO), ADASYN (ADA), NearMiss (NM), InstanceHardnessThreshold (IHT), SMOTEENN (SE), SMOTETomek (ST), RandomOverSampling in the feature space (ROS<sub>F</sub>), RandomUnderSampling in the feature space (RUS<sub>F</sub>), RandomOverSampling applied to raw data (ROS<sub>R</sub>), and RandomUnderSampling applied to raw data (RUS<sub>R</sub>)). <br>
 These tables use color-coding to emphasize the cases that resampling methods improve model performance.
-<p align="center"><img src="docs/images/CNN.png" width="502"><br>The Recall, Precision, Specificity, F1-score, MCC values of CNN when employing various data
+<p align="center"><img src="docs/images/CNN.png" width="502"><br>The Recall, Precision, Specificity, F1-score, MCC, and AUC values of CNN when employing various data
 resampling techniques</p>
-<p align="center"><img src="docs/images/LogRobust.png" width="502"><br>The Recall, Precision, Specificity, F1-score, MCC values of LogRobust when employing various data
+<p align="center"><img src="docs/images/LogRobust.png" width="502"><br>The Recall, Precision, Specificity, F1-score, MCC, and AUC values of LogRobust when employing various data
 resampling techniques</p>
-<p align="center"><img src="docs/images/NeuralLog.png" width="502"><br>The Recall, Precision, Specificity, F1-score, MCC values of NeuralLog when employing various data
+<p align="center"><img src="docs/images/NeuralLog.png" width="502"><br>The Recall, Precision, Specificity, F1-score, MCC, and AUC values of NeuralLog when employing various data
 resampling techniques</p>
