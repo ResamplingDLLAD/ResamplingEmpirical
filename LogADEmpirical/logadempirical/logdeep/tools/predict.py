@@ -343,23 +343,23 @@ class Predicter():
         with open(self.vocab_path, 'rb') as f:
             vocab = pickle.load(f)
 
-        # if self.model_name == "cnn":
-        #     model = TextCNN(self.dim_model, self.seq_len, 128).to(self.device)
-        # elif self.model_name == "neurallog":
-        #     model = NeuralLog(num_encoder_layers=1, num_heads=12, dim_model=768, dim_feedforward=2048,
-        #                       droput=0.2).to(self.device)
-        # else:
-        #     lstm_model = robustlog
-        #     model_init = lstm_model(input_size=self.input_size,
-        #                             window_size=self.history_size,
-        #                             hidden_size=self.hidden_size,
-        #                             num_layers=self.num_layers,
-        #                             vocab_size=len(vocab),
-        #                             embedding_dim=self.embedding_dim)
-        #     model = model_init.to(self.device)
-        # model.load_state_dict(torch.load(self.model_path)['state_dict'])
-        # model.eval()
-        # print('model_path: {}'.format(self.model_path))
+        if self.model_name == "cnn":
+            model = TextCNN(self.dim_model, self.seq_len, 128).to(self.device)
+        elif self.model_name == "neurallog":
+            model = NeuralLog(num_encoder_layers=1, num_heads=12, dim_model=768, dim_feedforward=2048,
+                              droput=0.2).to(self.device)
+        else:
+            lstm_model = robustlog
+            model_init = lstm_model(input_size=self.input_size,
+                                    window_size=self.history_size,
+                                    hidden_size=self.hidden_size,
+                                    num_layers=self.num_layers,
+                                    vocab_size=len(vocab),
+                                    embedding_dim=self.embedding_dim)
+            model = model_init.to(self.device)
+        model.load_state_dict(torch.load(self.model_path)['state_dict'])
+        model.eval()
+        print('model_path: {}'.format(self.model_path))
 
         test_normal_loader, test_abnormal_loader = generate(self.output_dir, 'test.pkl',
                                                             is_neural=self.embeddings == 'neural')

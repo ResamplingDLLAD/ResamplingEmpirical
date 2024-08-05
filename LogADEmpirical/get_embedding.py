@@ -23,15 +23,15 @@ class NumpyEncoder(json.JSONEncoder):
 # Specify logger
 logger = logging.getLogger('embedding')
 logger.setLevel(logging.INFO)
-dataset = 'bgl' #  bgl, tdb, spirit, hdfs
-save_path = '../../dataset/bgl'
-templatesDir = '../../dataset/bgl'
-log_file = 'BGL.log'
+dataset = 'huawei' #  bgl, tdb, spirit, hdfs
+save_path = '../../dataset/huawei'
+templatesDir = '../../dataset/huawei'
+log_file = 'huawei.log'
 logID2Temp, templates = load_templates_from_structured(templatesDir, logger, dataset,
                                                        log_file=log_file)
 templateVocab = nlp_emb_mergeTemplateEmbeddings_BGL(save_path, templates, dataset, logger)
 
-with open(os.path.join(save_path, 'templates_BGL.vec'), 'r', encoding='utf-8') as reader:
+with open(os.path.join(save_path, 'templates_huawei.vec'), 'r', encoding='utf-8') as reader:
     templateVocab = {}
     line_num = 0
     for line in reader.readlines():

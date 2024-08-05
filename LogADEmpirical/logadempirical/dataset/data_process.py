@@ -98,29 +98,29 @@ def process_dataset(data_dir, output_dir, log_file, dataset_name, window_type, w
 
         if 'huawei' in dataset_name:
             df["Label"] = df["Label"].apply(lambda x: int(x != "-"))
-            window_df, _ = sliding(df[["Label", "EventId", "EventTemplate", "Content"]],
-                                para={"window_size": window_size,
-                                      "step_size": step_size})
-            window_df = shuffle(window_df).reset_index(drop=True)
-            n_train = int(len(window_df) * train_size)
-            train_window = window_df.iloc[:n_train, :].to_dict("records")
-            test_window = window_df.iloc[n_train:, :].to_dict("records")
+            # window_df, _ = sliding(df[["Label", "EventId", "EventTemplate", "Content"]],
+            #                     para={"window_size": window_size,
+            #                           "step_size": step_size})
+            # window_df = shuffle(window_df).reset_index(drop=True)
+            # n_train = int(len(window_df) * train_size)
+            # train_window = window_df.iloc[:n_train, :].to_dict("records")
+            # test_window = window_df.iloc[n_train:, :].to_dict("records")
 
-            # print('Train window')
-            # train_window, _ = sliding(
-            #     df[["Label", "EventId", "EventTemplate", "Content"]].iloc[:n_train, :],
-            #     para={"window_size": window_size,
-            #           "step_size": step_size})
-            # train_window = train_window.to_dict("records")
-            # print('Test window')
-            # test_window, start_end_index_pair = sliding(
-            #     df[["Label", "EventId", "EventTemplate", "Content"]].iloc[n_train:,
-            #     :].reset_index(drop=True),
-            #     para={"window_size": window_size, "step_size": step_size})
-            # test_window = test_window.to_dict("records")
-            # os.makedirs(output_dir, exist_ok=True)
-            # with open(os.path.join(output_dir, "start_end_index_pair.pkl"), mode="wb") as f:
-            #     pickle.dump(start_end_index_pair, f)
+            print('Train window')
+            train_window, _ = sliding(
+                df[["Label", "EventId", "EventTemplate", "Content"]].iloc[:n_train, :],
+                para={"window_size": window_size,
+                      "step_size": step_size})
+            train_window = train_window.to_dict("records")
+            print('Test window')
+            test_window, start_end_index_pair = sliding(
+                df[["Label", "EventId", "EventTemplate", "Content"]].iloc[n_train:,
+                :].reset_index(drop=True),
+                para={"window_size": window_size, "step_size": step_size})
+            test_window = test_window.to_dict("records")
+            os.makedirs(output_dir, exist_ok=True)
+            with open(os.path.join(output_dir, "start_end_index_pair.pkl"), mode="wb") as f:
+                pickle.dump(start_end_index_pair, f)
         else:
             if 'bgl' in dataset_name:
                 df["datetime"] = pd.to_datetime(df['Time'], format='%Y-%m-%d-%H.%M.%S.%f')

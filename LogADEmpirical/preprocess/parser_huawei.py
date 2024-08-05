@@ -314,23 +314,27 @@ def map_labels(row):
 
 if __name__ == "__main__":
     df = pd.read_csv('../../dataset/drain_labeled.csv')
-    selected_df = df.loc[:, ['Timestamp','Content','Label']]
+    # selected_df = df.loc[:, ['Timestamp','Content','Label']]
+    # selected_df['Label'] = df.apply(lambda row: map_labels(row), axis=1)
+    # selected_df.insert(0, 'LineId', None)
+    # selected_df['LineId'] = [i + 1 for i in range(len(selected_df))]
+    #
+    # regex = [
+    #     r'blk_(|-)[0-9]+',  # block id
+    #     r'(/|)([0-9]+\.){3}[0-9]+(:[0-9]+|)(:|)',  # IP
+    #     r'(?<=[^A-Za-z0-9])(\-?\+?\d+)(?=[^A-Za-z0-9])|[0-9]+$',  # Numbers
+    # ]
+    #
+    # st = 0.5  # Similarity threshold
+    # depth = 4  # Depth of all leaf nodes
+    # input_dir = '../../dataset/'  # The input directory of log file
+    # output_dir = '../../dataset/'
+    # parser = LogParser('huawei', indir=input_dir, outdir=output_dir, depth=depth, st=st, rex=regex)
+    # parser.parse(selected_df)
+
+    selected_df = df.loc[:, ['Label', 'Timestamp', 'Content']]
     selected_df['Label'] = df.apply(lambda row: map_labels(row), axis=1)
-    selected_df.insert(0, 'LineId', None)
-    selected_df['LineId'] = [i + 1 for i in range(len(selected_df))]
-
-    regex = [
-        r'blk_(|-)[0-9]+',  # block id
-        r'(/|)([0-9]+\.){3}[0-9]+(:[0-9]+|)(:|)',  # IP
-        r'(?<=[^A-Za-z0-9])(\-?\+?\d+)(?=[^A-Za-z0-9])|[0-9]+$',  # Numbers
-    ]
-
-    st = 0.5  # Similarity threshold
-    depth = 4  # Depth of all leaf nodes
-    input_dir = '../../dataset/'  # The input directory of log file
-    output_dir = '../../dataset/'
-    parser = LogParser('huawei', indir=input_dir, outdir=output_dir, depth=depth, st=st, rex=regex)
-    parser.parse(selected_df)
+    selected_df.to_csv('../../dataset/huawei/huawei.log', sep=' ', index=False)
 
 
 

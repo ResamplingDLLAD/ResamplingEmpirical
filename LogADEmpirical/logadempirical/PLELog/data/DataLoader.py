@@ -285,7 +285,8 @@ def loadBGLLogs_node_fixLength(logID2Temp, fixLength):
 
 
 def load_templates_from_structured(dir, logger, dataset="BGL", log_file="BGL.log"):
-    filePath = os.path.join(dir, '{}_templates.csv'.format(log_file))
+    # filePath = os.path.join(dir, '{}_templates.csv'.format(log_file))
+    filePath = os.path.join(dir, 'huawei_templates.csv')
     print(filePath)
     templates = []
     logID2Temp = {}
