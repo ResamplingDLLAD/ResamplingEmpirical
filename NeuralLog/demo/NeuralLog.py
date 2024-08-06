@@ -163,6 +163,7 @@ def test_model(model, x, y, batch_size):
     print('AUC: {}'.format(AUC))
     print('MCC:{}'.format(mcc))
 
+
 def arg_parser():
     parser = ArgumentParser()
     parser.add_argument("--log_file", default="../../dataset/bgl/BGL.log", help="path to raw logs")
@@ -175,6 +176,7 @@ def arg_parser():
     parser.add_argument("--batch_size", default=64, type=int)
     parser.add_argument("--model_file", default="bgl_transformer.hdf5", type=str, help="path to the trained model")
     return parser
+
 
 if __name__ == '__main__':
     parser = arg_parser()

@@ -190,7 +190,7 @@ def nlp_emb_mergeTemplateEmbeddings_BGL(dir, templates, dataset, logger):
     elif dataset == "hdfs":
         vec_file = "templates_HDFS"
     elif dataset == "huawei":
-        vec_file = "templates_Huawei"
+        vec_file = "templates_huawei"
     else:
         logger.info("Unknown dataset")
         exit(-2)

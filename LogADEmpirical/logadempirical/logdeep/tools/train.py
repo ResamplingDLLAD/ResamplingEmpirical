@@ -254,7 +254,7 @@ class Trainer():
         self.threshold_rate = self.num_train_log // self.num_valid_log
 
         if self.model_name == "cnn":
-            self.model = TextCNN(self.dim_model, self.seq_len, 128).to(self.device)
+            self.model = TextCNN(self.dim_model, self.history_size, 128).to(self.device)
         elif self.model_name == "autoencoder":
             self.model = AutoEncoder(self.hidden_size, self.num_layers, embedding_dim=self.embedding_dim).to(
                 self.device)

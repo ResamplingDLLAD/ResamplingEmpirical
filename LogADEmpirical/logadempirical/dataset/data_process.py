@@ -2,6 +2,7 @@ import os
 import gc
 import pandas as pd
 import numpy as np
+from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 from logadempirical.logdeep.dataset.session import sliding_window, session_window, session_window_bgl, fixed_window
 import shutil
@@ -98,29 +99,43 @@ def process_dataset(data_dir, output_dir, log_file, dataset_name, window_type, w
 
         if 'huawei' in dataset_name:
             df["Label"] = df["Label"].apply(lambda x: int(x != "-"))
-            # window_df, _ = sliding(df[["Label", "EventId", "EventTemplate", "Content"]],
-            #                     para={"window_size": window_size,
-            #                           "step_size": step_size})
-            # window_df = shuffle(window_df).reset_index(drop=True)
-            # n_train = int(len(window_df) * train_size)
-            # train_window = window_df.iloc[:n_train, :].to_dict("records")
-            # test_window = window_df.iloc[n_train:, :].to_dict("records")
+            window_df, _ = sliding(df[["Label", "EventId", "EventTemplate", "Content"]],
+                                   para={"window_size": window_size,
+                                         "step_size": step_size})
+            window_df['max_label'] = window_df['Label'].apply(max)
 
-            print('Train window')
-            train_window, _ = sliding(
-                df[["Label", "EventId", "EventTemplate", "Content"]].iloc[:n_train, :],
-                para={"window_size": window_size,
-                      "step_size": step_size})
+            n_train = int(len(window_df) * train_size)
+            df_label_normal = window_df[window_df['max_label'] == 0]
+            df_label_anomaly = window_df[window_df['max_label'] == 1]
+
+            df_label_anomaly_80, df_label_anomaly_20 = train_test_split(df_label_anomaly, test_size=0.2, random_state=42)
+            print('Train anomaly', len(df_label_anomaly_80))
+            print('Test anomaly', len(df_label_anomaly_20))
+            # Calculate the number of rows of normal
+            rows_needed_from_label_normal = n_train - len(df_label_anomaly_80)
+
+            # Sample the required number
+            df_label_normal_sample = df_label_normal.iloc[:rows_needed_from_label_normal]
+
+            train_window = pd.concat([df_label_anomaly_80, df_label_normal_sample]).sort_index()
             train_window = train_window.to_dict("records")
-            print('Test window')
-            test_window, start_end_index_pair = sliding(
-                df[["Label", "EventId", "EventTemplate", "Content"]].iloc[n_train:,
-                :].reset_index(drop=True),
-                para={"window_size": window_size, "step_size": step_size})
+            test_window = pd.concat([df_label_anomaly_20, df_label_normal.drop(df_label_normal_sample.index)]).sort_index()
             test_window = test_window.to_dict("records")
-            os.makedirs(output_dir, exist_ok=True)
-            with open(os.path.join(output_dir, "start_end_index_pair.pkl"), mode="wb") as f:
-                pickle.dump(start_end_index_pair, f)
+            print('Train sessions:', len(train_window))
+            print('Test sessions:', len(test_window))
+
+            # print('Train window')
+            # train_window, _ = sliding(
+            #     df[["Label", "EventId", "EventTemplate", "Content"]].iloc[:n_train, :],
+            #     para={"window_size": window_size,
+            #           "step_size": step_size})
+            # train_window = train_window.to_dict("records")
+            # print('Test window')
+            # test_window, start_end_index_pair = sliding(
+            #     df[["Label", "EventId", "EventTemplate", "Content"]].iloc[n_train:,
+            #     :].reset_index(drop=True),
+            #     para={"window_size": window_size, "step_size": step_size})
+            # test_window = test_window.to_dict("records")
         else:
             if 'bgl' in dataset_name:
                 df["datetime"] = pd.to_datetime(df['Time'], format='%Y-%m-%d-%H.%M.%S.%f')
@@ -134,7 +149,7 @@ def process_dataset(data_dir, output_dir, log_file, dataset_name, window_type, w
 
             if random_sample:
                 print("Random sampling starts")
-                window_df = sliding(df[["timestamp", "Label", "EventId", "deltaT", "EventTemplate", "Content"]],
+                window_df, _ = sliding(df[["timestamp", "Label", "EventId", "deltaT", "EventTemplate", "Content"]],
                                            para={"window_size": window_size,
                                                  "step_size": step_size})
                 window_df = shuffle(window_df).reset_index(drop=True)
@@ -154,6 +169,7 @@ def process_dataset(data_dir, output_dir, log_file, dataset_name, window_type, w
                         drop=True),
                     para={"window_size": window_size, "step_size": step_size})
                 test_window = test_window.to_dict("records")
+                os.makedirs(output_dir, exist_ok=True)
                 with open(os.path.join(output_dir, "start_end_index_pair.pkl"), mode="wb") as f:
                     pickle.dump(start_end_index_pair, f)
     elif window_type == "session":
