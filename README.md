@@ -3,21 +3,20 @@
 Repository for the paper: On the Influence of Data Resampling for Deep Learning-Based Anomaly Detection: Insights and Recommendations.
 
 **Abstract**: 
-Numerous Deep Learning (DL)-based approaches have garnered considerable attention in the field of software Log Anomaly Detection (LAD). However, a practical challenge persists: The prevalent issue of class imbalance in the public data commonly used to train the DL models. This imbalance is characterized by a substantial disparity in the number of abnormal log sequences compared to normal ones, for example, anomalies represent less than 1% of one of the most popular datasets, namely the Thunderbird dataset.  Previous research has indicated that existing DLLAD approaches may exhibit unsatisfactory performance, particularly when confronted with datasets featuring severe class imbalances. Mitigating class imbalance through data resampling has proven effective for other software engineering tasks, however, it has been unexplored for LAD thus far.
-
-This study aims to fill this gap by providing an in-depth analysis of the impact of diverse data resampling methods on existing DLLAD approaches from two distinct perspectives. Firstly, we assess the performance of these DLLAD approaches across three datasets, and explore the impact of resampling ratios of normal to abnormal data on ten data resampling methods. Secondly, we evaluate the effectiveness of the data resampling methods when utilizing optimal resampling ratios of normal to abnormal data. Our findings indicate that oversampling methods generally outperform undersampling and hybrid sampling methods. Data resampling on raw data yields superior results compared to data resampling in the feature space. In most cases, certain undersampling and hybrid methods (e.g., SMOTEENN and InstanceHardnessThreshold) show limited effectiveness. Additionally, by exploring the resampling ratio of normal to abnormal data, we suggest generating more data for minority classes through oversampling while removing less data from majority classes through undersampling. 
-
-In conclusion, our study provides valuable insights into the intricate relationship between data resampling methods and DLLAD. By addressing the challenge of class imbalance, researchers and practitioners can enhance the model performance in DLLAD.
+Numerous Deep Learning (DL)-based approaches have gained attention in software Log Anomaly Detection (LAD), yet class imbalance in training data remains a challenge, with anomalies often comprising less than 1\% of datasets like Thunderbird. Existing DLLAD methods may underperform in severely imbalanced datasets. Although data resampling has proven effective in other software engineering tasks, it has not been explored in LAD. This study aims to fill this gap by providing an in-depth analysis of the impact of diverse data resampling methods on existing DLLAD approaches from two distinct perspectives. Firstly, we assess the performance of these DLLAD approaches across four datasets with different levels of class imbalance, and we explore the impact of resampling ratios of normal to abnormal data on DLLAD approaches. Secondly, we evaluate the effectiveness of the data resampling methods when utilizing optimal resampling ratios of normal to abnormal data. Our findings indicate that oversampling methods generally outperform undersampling and hybrid sampling methods. Data resampling on raw data yields superior results compared to data resampling in the feature space. These improvements are attributed to the increased attention given to important tokens. By exploring the resampling ratio of normal to abnormal data, we suggest generating more data for minority classes through oversampling while removing less data from majority classes through undersampling. In conclusion, our study provides valuable insights into the intricate relationship between data resampling methods and DLLAD. By addressing the challenge of class imbalance, researchers and practitioners can enhance DLLAD performance.
 
 ## Framwork of DLAD Models
 The typical workflow of DLAD approaches consists of four phases: 1) log parsing, 2) log grouping, 3) log embedding, and 4) model training and prediction.
-<p align="center"><img src="docs/images/framework.png" width="502"><br>The Common Workflow of DLAD Approaches</p>
+<p align="center"><img src="docs/images/framework.png" width="502"><br>The common workflow of DLAD approaches.</p>
 
 ## Data 
-The datasets used for training and evaluation are from three publicly available datasets: BGL, Thunderbird and Spirit. The raw logs can be downloaded at https://www.usenix.org/cfdr-data.
+The datasets used for training and evaluation are from four publicly available datasets: BGL, Thunderbird, Spirit and Huawei Cloud. 
 
-For a detailed description of the datasets, please refer to the [DSN'07 paper](https://ieeexplore.ieee.org/document/4273008) by Adam Oliner and Jon Stearley.
-<p align="center"><img src="docs/images/data.png" width="502"><br>Statistics of the three public datasets</p>
+The raw logs for BGL, Thunderbird and Spirit can be downloaded from https://www.usenix.org/cfdr-data. </br>The Huawei Cloud data processed by Drain parser can be downloaded from https://zenodo.org/records/7609780.
+
+For a detailed description of the datasets, please refer to the [DSN'07 paper](https://ieeexplore.ieee.org/document/4273008) paper for BGL, Thunderbird and Spirit, and the [Hades](https://ieeexplore.ieee.org/document/10172782) paper for Huawei Cloud.
+<p align="center"><img src="docs/images/data.png" width="502"><br>Statistics of the four public datasets</p>
+<p align="center"><img src="docs/images/log_variety.png" width="502"><br>Log variety in the datasets</p>
 
 Here are the initial and final proportions of sequence anomalies before and after employing resampling techniques.
 <p align="center"><img src="docs/images/sampled_data.png" width="502"><br>Statistics after over-/under-/hybrid sampling the original data</p>
@@ -28,7 +27,7 @@ Here are the initial and final proportions of sequence anomalies before and afte
 In this work, we investigate the influence of eleven sampling methods on the performance of three DLAD approaches, namely [CNN](https://ieeexplore.ieee.org/document/8511880), [LogRobust](https://dl.acm.org/doi/10.1145/3338906.3338931) and [NeuralLog](https://www.computer.org/csdl/proceedings-article/ase/2021/033700a492/1AjSXBpYSuk).
 
 ### Data Preparation
-1. Download three datasets and put them under the folder ./dataset.
+1. Download the four datasets and put them under the folder ./dataset.
 2. Name the datasets according to their names (i.e. bgl, Spirit and Thunderbird).
 3. Parse the raw logs via [Drain](https://ieeexplore.ieee.org/document/8029742) parser with default parameters setting before running CNN and LogRobust.
 ```shell
