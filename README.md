@@ -12,7 +12,7 @@ The typical workflow of DLLAD approaches consists of four phases: 1) log parsing
 ## Data 
 The datasets used for training and evaluation are from four publicly available datasets: BGL, Thunderbird, Spirit and Huawei Cloud. 
 
-The raw logs for BGL, Thunderbird and Spirit can be downloaded from https://www.usenix.org/cfdr-data. </br>The Huawei Cloud data processed by Drain parser can be downloaded from https://zenodo.org/records/7609780.
+The raw logs for BGL, Thunderbird and Spirit can be downloaded from https://www.usenix.org/cfdr-data. </br>The Huawei Cloud data processed by Drain parser can be downloaded from https://zenodo.org/records/7609780. The aggregated Huawei.log can be found in the ./docs folder.
 
 For a detailed description of the datasets, please refer to the [DSN'07 paper](https://ieeexplore.ieee.org/document/4273008) paper for BGL, Thunderbird and Spirit, and the [Hades](https://ieeexplore.ieee.org/document/10172782) paper for Huawei Cloud.
 <p align="center"><img src="docs/images/data.png" width="502"><br>The statistics of the four public datasets. TB, ws, Msg, Seq, and A are the abbreviations of the Thunderbird dataset, window sizes, Messages, Sequences, and Anomalies, respectively.</p>
@@ -76,6 +76,7 @@ python NeuralLog.py --help
 
 ## Results
 Here are the evaluation results under different data resampling techniques (i.e., NoSampling (NS), SMOTE (SMO), ADASYN (ADA), NearMiss (NM), InstanceHardnessThreshold (IHT), SMOTEENN (SE), SMOTETomek (ST), RandomOverSampling in the feature space (ROS<sub>F</sub>), RandomUnderSampling in the feature space (RUS<sub>F</sub>), RandomOverSampling applied to raw data (ROS<sub>R</sub>), and RandomUnderSampling applied to raw data (RUS<sub>R</sub>)). <br>
+
 These tables use color-coding to emphasize the cases that resampling methods improve model performance. Darker cells signify superior performance, while various colors denote statistical significance among data resampling methods for each evaluation metric (determined by the Scott-Knott ESD test with a p-value<0.05), as observed in the subsequent tables.
 <p align="center"><img src="docs/images/CNN.png" width="502"><br>The Recall, Precision, Specificity, F1-score, MCC, and AUC values of CNN when employing various data resampling methods to the four datasets, each with three different window sizes.</p>
 <p align="center"><img src="docs/images/LogRobust.png" width="502"><br>The Recall, Precision, Specificity, F1-score, MCC, and AUC values of LogRobust when employing various data resampling methods to the four datasets, each with three different window sizes.</p>
